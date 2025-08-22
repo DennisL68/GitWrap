@@ -4,15 +4,15 @@
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\GitWrapSub_Branch\shell\10_New]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="New Local Area [Checkout -b]"
+"MUIVerb"="New Area [Checkout -b] (Local)"
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\GitWrapSub_Branch\shell\11_Switch]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Switch Local Area [Branch switch]"
+"MUIVerb"="Switch Area [Switch branch] (Local)"
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\GitWrapSub_Branch\shell\12_LocalDel]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Delete Local Area [Branch -d]"
+"MUIVerb"="Delete Area [Branch -d] (Local)"
 
 ; [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\GitWrapSub_Branch\shell\13_RemoteDel]
 ; "Icon"="C:\\Program Files\\Git\\git-bash.exe"
