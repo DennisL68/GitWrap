@@ -24,35 +24,42 @@ The following provides some enancements to this solution
 
 ## 3. Limitations
 
-Windows File Explorer only support 16 static context menu per entry.
-To pass by this limitations, some of the code in [Adam the Automator - How to Build a PowerShell Form Menu for your PowerShell Scripts][5] will be tried out in a future version.
+* Windows File Explorer only support 16 static context menu per entry.
+To by-pass this limitations, some of the code in [Adam the Automator - How to Build a PowerShell Form Menu for your PowerShell Scripts][7] will be tried out in a future version.
+
+* The current implementation of `GitWrap` is a prototyped version that breaks `Windows Security` and requires `Real-time protection` in `Virus and threat protection` to be turned **off**.  
+**THIS IS NOT A RECOMMENDED ACTION!**
 
 ## 4. How do I use this repo?
 
-Apply the reg files and you are done.
+Apply the reg files, disable `Real-time protection` and you are done.
 
 To change the code, uncomment the PowerShell scripts within the reg files.
 Apply your changes and test by hand (no unit tests available yet).
 
-To "complie" the script into a registry command @, run all the code, making the last row convert the here 
-string to Base64, and paste the resulting string to the reg command @ after `Encoding`. 
+To "complie" the script into a registry `command @`, run all the code, making the last row convert the here 
+string to Base64, and paste the resulting string to the reg `command @` after `Encoding`. 
 Remember to keep the registry command as a string.
 
-Before applying any changes, make sure to delete the old application in key `HKCU\SOFTWARE\Classes\Directory\ContextMenus\GitWrap`.
+Before applying any changes, make sure to delete any old application entries in key `HKCU\SOFTWARE\Classes\Directory\ContextMenus\GitWrap`.
 
 ## 5. References and links
 
 * [Git for Windows][1]
-* [PowerShell 7.2 (LTS)][2]
-* [TortoiseGit][3]
-* [Creating Shortcut Menu Handlers][4]
+* [PowerShell 7.0 (LTS)][2]
+* [PowerShell 7.2 (LTS)][3]
+* [PowerShell 7.4 (LTS)][4]
+* [TortoiseGit][5]
+* [Creating Shortcut Menu Handlers][6]
 
 ## 6. Contacts
 
 Please contact the author for any questions or if you'd like to help out.
 
 [1]:https://gitforwindows.org/
-[2]:https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-72?view=powershell-7.2
-[3]:https://tortoisegit.org/download/
-[4]:https://learn.microsoft.com/en-us/windows/win32/shell/context-menu-handlers
-[5]:https://adamtheautomator.com/powershell-form/
+[2]:https://learn.microsoft.com/en-us/previous-versions/powershell/scripting/whats-new/what-s-new-in-powershell-70?view=powershell-7
+[3]:https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-72?view=powershell-7.2
+[4]:https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-74?view=powershell-7.4
+[5]:https://tortoisegit.org/download/
+[6]:https://learn.microsoft.com/en-us/windows/win32/shell/context-menu-handlers
+[7]:https://adamtheautomator.com/powershell-form/
