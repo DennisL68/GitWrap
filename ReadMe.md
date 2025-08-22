@@ -14,7 +14,7 @@ It will also add the current Git status to the top most File Explorer window.
 
 The prerequisites for applying all features of this repo is
 
-* PowerShell 7.2.x
+* PowerShell 7.x
 * Git for Windows
 * posh-git
 

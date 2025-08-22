@@ -3,29 +3,29 @@
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Background\shell\GitWrap]
 "ExtendedSubCommandsKey"="Directory\\ContextMenus\\GitWrap"
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Git Wrap r0.17"
+"MUIVerb"="Git Wrap r0.18"
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\00_Init]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Initialize Fileset [Git Init]"
+"MUIVerb"="Initialize Local File Collection [Git Init Repo]"
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\01_Clone]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Clone Remote [Git Clone]"
+"MUIVerb"="Clone Remote File Collection [Git Clone Repo]"
 "CommandFlags"=dword:00000040
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\10_Commit]
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Store State [Git Commit]"
+"MUIVerb"="Store Local Work Area State [Git Commit Branch]"
 
-[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\11_Sync]
-"Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Sync Remote [Git Pull/Push]"
-
-[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\12_Branch]
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\11_Branch]
 "ExtendedSubCommandsKey"="Directory\\ContextMenus\\GitWrap\\GitWrapSub_Branch"
 "Icon"="C:\\Program Files\\Git\\git-bash.exe"
-"MUIVerb"="Manage Work Area [Git Branch]"
+"MUIVerb"="Manage Local Work Area [Git Branch]"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\12_Sync]
+"Icon"="C:\\Program Files\\Git\\git-bash.exe"
+"MUIVerb"="Sync Remote Work Area [Git Pull/Push Branch]"
 "CommandFlags"=dword:00000040
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\23_Status]
