@@ -2,7 +2,7 @@
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\shell\24_Log\command]
 ; $cmd = @'
-; git log --oneline
+; git log --pretty=format:"%C(yellow)%h %Cgreen%ad %Cblue| %Creset%s%C(red)%d %Creset[%C(magenta)%an%Creset]" --date=iso
 ; '@
 ; [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($cmd))
-@="pwsh.exe -WindowStyle normal -NoExit -EncodedCommand ZwBpAHQAIABsAG8AZwAgAC0ALQBvAG4AZQBsAGkAbgBlAA=="
+@="pwsh.exe -WindowStyle normal -NoExit -EncodedCommand ZwBpAHQAIABsAG8AZwAgAC0ALQBwAHIAZQB0AHQAeQA9AGYAbwByAG0AYQB0ADoAIgAlAEMAKAB5AGUAbABsAG8AdwApACUAaAAgACUAQwBnAHIAZQBlAG4AJQBhAGQAIAAlAEMAYgBsAHUAZQB8ACAAJQBDAHIAZQBzAGUAdAAlAHMAJQBDACgAcgBlAGQAKQAlAGQAIAAlAEMAcgBlAHMAZQB0AFsAJQBDACgAbQBhAGcAZQBuAHQAYQApACUAYQBuACUAQwByAGUAcwBlAHQAXQAiACAALQAtAGQAYQB0AGUAPQBpAHMAbwA="
