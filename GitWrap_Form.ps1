@@ -19,7 +19,7 @@ public class ShellIcon {
 
 # Create main form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "GitWrap"
+$form.Text = "GitWrap rX.X"
 $form.Size = New-Object System.Drawing.Size(800,600)
 $form.StartPosition = "CenterScreen"
 
@@ -145,7 +145,8 @@ $treeView.Nodes.Add($topNode)
     $node.Tag = $_.Name
     $treeView.Nodes.Add($node)
 }
- #>
+#>
+
 # Expand directories dynamically
 $treeView.Add_BeforeExpand({
     param($sender, $e)
@@ -204,7 +205,8 @@ $btn3.Add_Click({ $webBrowser.Refresh() })
 # Navigate when TreeView node selected
 $treeView.Add_AfterSelect({
     param($sender, $e)
-    $path = $e.Node.Tag
+    #Wait-Debugger
+    $path = $e.Node.Nodes.Tag
     if (Test-Path $path) {
         $webBrowser.Navigate("file:///$path")
     }
