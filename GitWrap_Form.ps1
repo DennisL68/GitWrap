@@ -1,4 +1,10 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+﻿#check module Microsoft.PowerShell.ThreadJob
+
+$InitGitClone = [scriptblock]::Create(
+    (Get-Content .\Init_GitClone.ps1 -Raw)
+)
+
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type @"
 using System;
@@ -21,13 +27,20 @@ $form.StartPosition = "CenterScreen"
 $menuStrip = New-Object System.Windows.Forms.MenuStrip
 
 $fileMenu = New-Object System.Windows.Forms.ToolStripMenuItem "File"
+    $initItem = New-Object System.Windows.Forms.ToolStripMenuItem "Initialize File Collection"
+    $initItem.Add_Click({ Start-ThreadJob {Initialize-GitClone} -InitializationScript $InitGitClone })
+    $fileMenu.DropDownItems.Add($initItem)
+
+    $cloneItem = New-Object System.Windows.Forms.ToolStripMenuItem "Clone File Collection"
+    $fileMenu.DropDownItems.Add($cloneItem)
+
     $exitItem = New-Object System.Windows.Forms.ToolStripMenuItem "Exit"
     $exitItem.Add_Click({ $form.Close() })
     $fileMenu.DropDownItems.Add($exitItem)
 
     $menuStrip.Items.Add($fileMenu)
 
-$collectionMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Collection"
+<# $collectionMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Collection"
     $initItem = New-Object System.Windows.Forms.ToolStripMenuItem "Initialize File Collection"
     $collectionMenu.DropDownItems.Add($initItem)
 
@@ -35,7 +48,7 @@ $collectionMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Collection"
     $collectionMenu.DropDownItems.Add($cloneItem)
 
     $menuStrip.Items.Add($collectionMenu)
-
+ #>
 $workMenu =  New-Object System.Windows.Forms.ToolStripMenuItem "Work Area"
     $storeState = New-Object System.Windows.Forms.ToolStripMenuItem "Store Work State"
     $workMenu.DropDownItems.Add($storeState)
@@ -60,6 +73,13 @@ $workMenu =  New-Object System.Windows.Forms.ToolStripMenuItem "Work Area"
     $workMenu.DropDownItems.Add($syncWork)
 
     $menuStrip.Items.Add($workMenu)
+
+$conflictMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Resolve Conflicts"
+
+    $resolveWord = New-Object System.Windows.Forms.ToolStripMenuItem "Word files..."
+    $conflictMenu.DropDownItems.Add($resolveWord)
+
+    $menuStrip.Items.Add($conflictMenu)
 
 $helpMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Help"
     $aboutItem = New-Object System.Windows.Forms.ToolStripMenuItem "About"
