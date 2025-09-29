@@ -215,17 +215,29 @@ process {#this is actually also "begin"
 
     # Expand directories dynamically
     $treeView.Add_BeforeExpand({
-        param($sender, $e)
-        if ($e.Node.Nodes.Count -eq 0) {
+        param($ThisObject, $EventArgumentObject)
+        if ($EventArgumentObject.Node.Nodes.Count -eq 0) {
             try {
-                Get-ChildItem -Path $e.Node.Tag -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+                Get-ChildItem -Path $EventArgumentObject.Node.Tag -Directory -ErrorAction SilentlyContinue | foreach {
                     $childNode = New-Object System.Windows.Forms.TreeNode $_.Name
                     $childNode.Tag = $_.FullName
-                    $e.Node.Nodes.Add($childNode)
+                    $EventArgumentObject.Node.Nodes.Add($childNode)
                 }
             } catch {}
         }
     })
+
+    #Stop invalid from beeing selected
+    $treeView.Add_BeforeSelect({
+        param($ThisObject, $EventArgumentObject)
+        
+        # Prevent selection of the top node
+        if ($EventArgumentObject.Node -eq $topNode) {
+            $EventArgumentObject.Cancel = $true
+        }
+    })
+
+    $treeView.ExpandAll()
 
     # Right pane: Panel to hold toolbar and WebBrowser
     $rightPanel = New-Object System.Windows.Forms.Panel
@@ -262,6 +274,7 @@ process {#this is actually also "begin"
     $webBrowser.Dock = [System.Windows.Forms.DockStyle]::Fill
     $rightPanel.Controls.Add($webBrowser)
     $webBrowser.BringToFront()
+    $webBrowser.Navigate("file:///$($PWD.path)")
 
     # Button functionality
     $btn1.Add_Click({ if ($webBrowser.CanGoBack) { $webBrowser.GoBack() } })
@@ -270,9 +283,8 @@ process {#this is actually also "begin"
 
     # Navigate when TreeView node selected
     $treeView.Add_AfterSelect({
-        param($sender, $e)
-        #Wait-Debugger
-        $path = $e.Node.Nodes.Tag
+        param($ThisObject, $EventArgumentObject)
+        $path = $EventArgumentObject.Node.Tag
         if (Test-Path $path) {
             $webBrowser.Navigate("file:///$path")
         }
