@@ -1,0 +1,1 @@
+﻿git log --pretty=format:"%C(yellow)%h %Cgreen%ad %Cblue| %Creset%s%C(red)%d %Creset[%C(magenta)%an%Creset]" --date=iso --graph --decorate

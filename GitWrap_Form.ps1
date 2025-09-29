@@ -2,12 +2,12 @@
     #check module Microsoft.PowerShell.ThreadJob
 
     ###
-    $InitGitClone = [scriptblock]::Create(
-        (Get-Content .\Scripts\Init_GitClone.ps1 -Raw)
+    $InitGitRepo = [scriptblock]::Create(
+        (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw)
     )
 
-    $CloneRemote = [scriptblock]::Create(
-        (Get-Content .\Scripts\Clone_Remote.ps1 -Raw)
+    $CloneGitRemote = [scriptblock]::Create(
+        (Get-Content .\Scripts\Clone_GitRemote.ps1 -Raw)
     )
 
     $CommitBranch = [scriptblock]::Create(
@@ -30,6 +30,22 @@
         (Get-Content .\Scripts\Prune_Remote.ps1 -Raw)
     )
 
+    $PullPush = [scriptblock]::Create(
+        (Get-Content .\Scripts\PullPush_Branch.ps1 -Raw)
+    )
+
+    $RefreshBranchStatus = [scriptblock]::Create(
+        (Get-Content .\Scripts\Refresh_Status.ps1 -Raw)
+    )
+
+    $GetBranchHistory = [scriptblock]::Create(
+        (Get-Content .\Scripts\Get_BranchLog.ps1 -Raw)
+    )
+
+    $GetRepoHistory = [scriptblock]::Create(
+        (Get-Content .\Scripts\Get_RepoLog.ps1 -Raw)
+    )
+
     ###
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -46,7 +62,7 @@ public class ShellIcon {
 
 }
 
-process {#this is actually also begin
+process {#this is actually also "begin"
     # Create main form
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "GitWrap rX.X"
@@ -57,13 +73,17 @@ process {#this is actually also begin
     $menuStrip = New-Object System.Windows.Forms.MenuStrip
 
     $fileMenu = New-Object System.Windows.Forms.ToolStripMenuItem "File"
-        $initItem = New-Object System.Windows.Forms.ToolStripMenuItem "Initialize File Collection"
-        $initItem.Add_Click({ Start-ThreadJob {'Initialize-GitClone'} -InitializationScript $InitGitClone })
-        $fileMenu.DropDownItems.Add($initItem)
+        $initRepo = New-Object System.Windows.Forms.ToolStripMenuItem "Initialize File Collection"
+        $initRepo.Add_Click({ Start-ThreadJob {'Initialize-GitClone'} -InitializationScript $InitGitRepo })
+        $fileMenu.DropDownItems.Add($initRepo)
 
-        $cloneItem = New-Object System.Windows.Forms.ToolStripMenuItem "Clone File Collection"
-        $cloneItem.Add_Click({ Start-ThreadJob {'Clone-Remote'} -InitializationScript $CloneRemote })
-        $fileMenu.DropDownItems.Add($cloneItem)
+        $cloneRemote = New-Object System.Windows.Forms.ToolStripMenuItem "Clone File Collection"
+        $cloneRemote.Add_Click({ Start-ThreadJob {'Clone-Remote'} -InitializationScript $CloneGitRemote })
+        $fileMenu.DropDownItems.Add($cloneRemote)
+
+        $ShowRepoLog = New-Object System.Windows.Forms.ToolStripMenuItem 'Show Repo Log'
+        $ShowRepoLog.Add_Click({ Start-ThreadJob {'Show-Repo-Log'} -InitializationScript $GetRepoHistory })
+        $fileMenu.HasDropDownItems.Add($ShowRepoLog)
 
         $exitItem = New-Object System.Windows.Forms.ToolStripMenuItem "Exit"
         $exitItem.Add_Click({ $form.Close() })
@@ -86,34 +106,43 @@ process {#this is actually also begin
         $storeState.Add_Click({ Start-ThreadJob {'Commit-Branch'} -InitializationScript $CommitBranch })
         $workMenu.DropDownItems.Add($storeState)
 
-        $manageWorkSubMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Manage Area"
+        $workSubMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Manage Area"
 
             $newArea = New-Object System.Windows.Forms.ToolStripMenuItem "Create New..."
             $newArea.Add_Click({ Start-ThreadJob {'New-Branch'} -InitializationScript $NewBranch })
-            $manageWorkSubMenu.DropDownItems.Add($newArea)
+            $workSubMenu.DropDownItems.Add($newArea)
 
             $switchArea = New-Object System.Windows.Forms.ToolStripMenuItem "Switch..."
             $switchArea.Add_Click({ Start-ThreadJob {'Swicth-Branch'} -InitializationScript $SwitchBranch })
-            $manageWorkSubMenu.DropDownItems.Add($switchArea)
+            $workSubMenu.DropDownItems.Add($switchArea)
 
             $deleteArea = New-Object System.Windows.Forms.ToolStripMenuItem "Delete..."
             $deleteArea.Add_Click({ Start-ThreadJob {'Delete-Branch'} -InitializationScript $DeleteBranch })
-            $manageWorkSubMenu.DropDownItems.Add($deleteArea)
+            $workSubMenu.DropDownItems.Add($deleteArea)
 
             $purgeRemote = New-Object System.Windows.Forms.ToolStripMenuItem "Purge Remote Info"
-            $purgeRemote.Add_Click({ Start-ThreadJob {'Prune Remote'} -InitializationScript $PruneRemote})
-            $manageWorkSubMenu.DropDownItems.Add($purgeRemote)
+            $purgeRemote.Add_Click({ Start-ThreadJob {'Prune Remote'} -InitializationScript $PruneRemote })
+            $workSubMenu.DropDownItems.Add($purgeRemote)
 
-        $workMenu.DropDownItems.Add($manageWorkSubMenu)
+        $workMenu.DropDownItems.Add($workSubMenu)
 
         $syncWork = New-Object System.Windows.Forms.ToolStripMenuItem "Sync Area"
+        $syncWork.Add_Click({ Start-ThreadJob {'Sync Branch'} -InitializationScript $PullPush })
         $workMenu.DropDownItems.Add($syncWork)
+
+        $refreshBranchStatus = New-Object System.Windows.Forms.ToolStripMenuItem "Refresh Status"
+        $RefreshBranchStatus.Add_Click({ Start-ThreadJob {"Refresh Barnch Status"} -InitializationScript $RefreshBranchStatus })
+        $workMenu.HasDropDownItems.Add($RefreshBranchStatus)
+
+        $ShowBranchLog = New-Object System.Windows.Forms.ToolStripMenuItem 'Show Repo Log'
+        $ShowBranchLog.Add_Click({ Start-ThreadJob {'Show-Repo-Log'} -InitializationScript $GetBranchHistory })
+        $fileMenu.HasDropDownItems.Add($ShowBranchLog)
 
         $menuStrip.Items.Add($workMenu)
 
-    $conflictMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Resolve Conflicts"
+    $conflictMenu = New-Object System.Windows.Forms.ToolStripMenuItem "Handle Diffs"
 
-        $resolveWord = New-Object System.Windows.Forms.ToolStripMenuItem "Word files..."
+        $resolveWord = New-Object System.Windows.Forms.ToolStripMenuItem "Resolve Word conflict..."
         $conflictMenu.DropDownItems.Add($resolveWord)
 
         $menuStrip.Items.Add($conflictMenu)
