@@ -3,47 +3,47 @@
 
     ###
     $InitGitRepo = [scriptblock]::Create(
-        (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw)
+        (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw -ErrorAction Stop)
     )
 
     $CloneGitRemote = [scriptblock]::Create(
-        (Get-Content .\Scripts\Clone_GitRemote.ps1 -Raw)
+        (Get-Content .\Scripts\Clone_GitRemote.ps1 -Raw -ErrorAction Stop)
     )
 
     $CommitBranch = [scriptblock]::Create(
-        (Get-Content .\Scripts\Commit-Branch.ps1 -Raw)
+        (Get-Content .\Scripts\Commit-Branch.ps1 -Raw -ErrorAction Stop)
     )
 
     $NewBranch = [scriptblock]::Create(
-        (Get-Content .\Scripts\New_Branch.ps1 -Raw)
+        (Get-Content .\Scripts\New_Branch.ps1 -Raw -ErrorAction Stop)
     )
 
     $SwitchBranch = [scriptblock]::Create(
-        (Get-Content .\Scripts\Switch_Branch.ps1 -Raw)
+        (Get-Content .\Scripts\Switch_Branch.ps1 -Raw -ErrorAction Stop)
     )
 
     $DeleteBranch = [scriptblock]::Create(
-        (Get-Content .\Scripts\Delete-Branch.ps1 -Raw)
+        (Get-Content .\Scripts\Delete-Branch.ps1 -Raw -ErrorAction Stop)
     )
 
     $PruneRemote = [scriptblock]::Create(
-        (Get-Content .\Scripts\Prune_Remote.ps1 -Raw)
+        (Get-Content .\Scripts\Prune_Remote.ps1 -Raw -ErrorAction Stop)
     )
 
     $PullPush = [scriptblock]::Create(
-        (Get-Content .\Scripts\PullPush_Branch.ps1 -Raw)
+        (Get-Content .\Scripts\PullPush_Branch.ps1 -Raw -ErrorAction Stop)
     )
 
     $RefreshBranchStatus = [scriptblock]::Create(
-        (Get-Content .\Scripts\Refresh_Status.ps1 -Raw)
+        (Get-Content .\Scripts\Refresh_Status.ps1 -Raw -ErrorAction Stop)
     )
 
     $GetBranchHistory = [scriptblock]::Create(
-        (Get-Content .\Scripts\Get_BranchLog.ps1 -Raw)
+        (Get-Content .\Scripts\Get_BranchLog.ps1 -Raw -ErrorAction Stop)
     )
 
     $GetRepoHistory = [scriptblock]::Create(
-        (Get-Content .\Scripts\Get_RepoLog.ps1 -Raw)
+        (Get-Content .\Scripts\Get_RepoLog.ps1 -Raw -ErrorAction Stop)
     )
 
     ###
@@ -83,7 +83,7 @@ process {#this is actually also "begin"
 
         $ShowRepoLog = New-Object System.Windows.Forms.ToolStripMenuItem 'Show Repo Log'
         $ShowRepoLog.Add_Click({ Start-ThreadJob {'Show-Repo-Log'} -InitializationScript $GetRepoHistory })
-        $fileMenu.HasDropDownItems.Add($ShowRepoLog)
+        $fileMenu.DropDownItems.Add($ShowRepoLog)
 
         $exitItem = New-Object System.Windows.Forms.ToolStripMenuItem "Exit"
         $exitItem.Add_Click({ $form.Close() })
@@ -131,12 +131,12 @@ process {#this is actually also "begin"
         $workMenu.DropDownItems.Add($syncWork)
 
         $refreshBranchStatus = New-Object System.Windows.Forms.ToolStripMenuItem "Refresh Status"
-        $RefreshBranchStatus.Add_Click({ Start-ThreadJob {"Refresh Barnch Status"} -InitializationScript $RefreshBranchStatus })
-        $workMenu.HasDropDownItems.Add($RefreshBranchStatus)
+        $refreshBranchStatus.Add_Click({ Start-ThreadJob {"Refresh Barnch Status"} -InitializationScript $RefreshBranchStatus })
+        $workMenu.DropDownItems.Add($refreshBranchStatus)
 
-        $ShowBranchLog = New-Object System.Windows.Forms.ToolStripMenuItem 'Show Repo Log'
-        $ShowBranchLog.Add_Click({ Start-ThreadJob {'Show-Repo-Log'} -InitializationScript $GetBranchHistory })
-        $fileMenu.HasDropDownItems.Add($ShowBranchLog)
+        $showBranchLog = New-Object System.Windows.Forms.ToolStripMenuItem 'Show Branch Log'
+        $showBranchLog.Add_Click({ Start-ThreadJob {'Show-Repo-Log'} -InitializationScript $GetBranchHistory })
+        $workMenu.DropDownItems.Add($showBranchLog)
 
         $menuStrip.Items.Add($workMenu)
 
