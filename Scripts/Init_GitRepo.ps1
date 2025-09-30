@@ -41,53 +41,53 @@ function Get-GitId {
     Invoke-Expression (Show-Command GitWrap_EnterId -PassThru)
 }
 
-function Initialize-GitClone {
-    try {
-        # Git Init
-        [string[]]$Result = git init 2>&1
-        if ($Result.Exception) {throw}
 
-        # Git Authority
-        $DisplayName = git config user.name
-        $Address = git config user.email
+try {
+    # Git Init
+    [string[]]$Result = git init 2>&1
+    if ($Result.Exception) {throw}
 
-        if (!$DisplayName -or !$Address) {# Prompt for ID
+    # Git Authority
+    $DisplayName = git config user.name
+    $Address = git config user.email
 
-            try {
-                $GitId = Get-GitId
-            } catch {
-                Remove-Item .git -Recurse -Force
-
-                [System.Windows.MessageBox]::Show(#error
-                'An ID is required for using a Git repository','GitWrap',0,'Error',0,'DefaultDesktopOnly'
-                ) | Out-Null
-
-                return
-            }
-        } else {
-            $GitId = [PSCustomObject]@{
-                DisplayName = $DisplayName
-                Address = $Address
-            }
-        }# endif
+    if (!$DisplayName -or !$Address) {# Prompt for ID
 
         try {
-            [mailaddress]($GitId.DisplayName + ' ' + $GitId.Address) | Out-Null
+            $GitId = Get-GitId
         } catch {
             Remove-Item .git -Recurse -Force
 
             [System.Windows.MessageBox]::Show(#error
-                'Cannot convert value of GitID to type "System.Net.Mail.MailAddress"','GitWrap',0,'Error',0,'DefaultDesktopOnly'
+            'An ID is required for using a Git repository','GitWrap',0,'Error',0,'DefaultDesktopOnly'
             ) | Out-Null
 
             return
         }
+    } else {
+        $GitId = [PSCustomObject]@{
+            DisplayName = $DisplayName
+            Address = $Address
+        }
+    }# endif
 
-        git config --local user.name $GitId.DisplayName
-        git config --local user.email $GitId.Address
+    try {
+        [mailaddress]($GitId.DisplayName + ' ' + $GitId.Address) | Out-Null
+    } catch {
+        Remove-Item .git -Recurse -Force
 
-        # Create ReadMe
-    @"
+        [System.Windows.MessageBox]::Show(#error
+            'Cannot convert value of GitID to type "System.Net.Mail.MailAddress"','GitWrap',0,'Error',0,'DefaultDesktopOnly'
+        ) | Out-Null
+
+        return
+    }
+
+    git config --local user.name $GitId.DisplayName
+    git config --local user.email $GitId.Address
+
+    # Create ReadMe
+@"
 # Headline
 
 ## 1. Description
@@ -117,58 +117,57 @@ function Initialize-GitClone {
 
 "@ | Out-File .\ReadMe.md -NoClobber -ErrorVariable ThisError
 
-        [string[]]$Result = $ThisError.ErrorRecord
-        if ($Result) {throw}
+    [string[]]$Result = $ThisError.ErrorRecord
+    if ($Result) {throw}
 
-        # Git Add
-        [string[]]$Result = git add . 2>&1
-        if ($Result.Exception) {throw}
+    # Git Add
+    [string[]]$Result = git add . 2>&1
+    if ($Result.Exception) {throw}
 
-        # Git Commit
-        [string[]]$Result = git commit -m'chore: Init' 2>&1
-        if ($Result.Exception) {throw}
-        if (($Result | Select -Index 1) -like 'nothing to commit*') {
-            $Result[0] = $Result[1]
-            throw
-        }
-        if ($Result[0] -like 'Author identity unknown') {throw}
-
-    } catch {
-        [System.Windows.MessageBox]::Show(#error
-            $Result[0],'GitWrap',0,'Error',0,'DefaultDesktopOnly'
-        ) | Out-Null
-        return
+    # Git Commit
+    [string[]]$Result = git commit -m'chore: Init' 2>&1
+    if ($Result.Exception) {throw}
+    if (($Result | Select -Index 1) -like 'nothing to commit*') {
+        $Result[0] = $Result[1]
+        throw
     }
+    if ($Result[0] -like 'Author identity unknown') {throw}
 
-    [System.Windows.MessageBox]::Show(#result
-        $Result[0],'GitWrap',0,'Info',0,'DefaultDesktopOnly'
+} catch {
+    Wait-Debugger
+    [System.Windows.MessageBox]::Show(#error
+        $Result[0],'GitWrap',0,'Error',0,'DefaultDesktopOnly'
     ) | Out-Null
+    return
+}
 
-    # Update File Explorer
-    $ThisGitStatus = Write-VcsStatus
-    $ThisGitStatus = $ThisGitStatus | ForEach-Object { $_ -replace '\x1b\[[0-9;]*m','' }
-    $ThisGitStatus = $ShuffleTrack + ' ' + (Get-GitStatus).RepoName + ' ' + $ThisGitStatus
+[System.Windows.MessageBox]::Show(#result
+    $Result[0],'GitWrap',0,'Info',0,'DefaultDesktopOnly'
+) | Out-Null
 
-    Add-Type -Namespace Util -Name WinApi  -MemberDefinition @"
-[DllImport("user32.dll")]
-public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+# Update File Explorer
+$ThisGitStatus = Write-VcsStatus
+$ThisGitStatus = $ThisGitStatus | ForEach-Object { $_ -replace '\x1b\[[0-9;]*m','' }
+$ThisGitStatus = $ShuffleTrack + ' ' + (Get-GitStatus).RepoName + ' ' + $ThisGitStatus
+
+Add-Type -Namespace Util -Name WinApi  -MemberDefinition @"
+  [DllImport("user32.dll")]
+  public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 "@
 
-    $hwndTopMostFileExplorer = [Util.WinApi]::FindWindow(
-    "CabinetWClass",     # the window class of interest
-    [NullString]::Value  # no window title to search for
-    )
+$hwndTopMostFileExplorer = [Util.WinApi]::FindWindow(
+  "CabinetWClass",     # the window class of interest
+  [NullString]::Value  # no window title to search for
+)
 
-    Add-Type -TypeDefinition @"
+Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 
 public static class Win32 {
-[DllImport("User32.dll", CharSet=CharSet.Unicode, EntryPoint="SetWindowText")]
-public static extern int SetWindowText(IntPtr hWnd, string strTitle);
+  [DllImport("User32.dll", CharSet=CharSet.Unicode, EntryPoint="SetWindowText")]
+  public static extern int SetWindowText(IntPtr hWnd, string strTitle);
 }
 "@
 
-    [Win32]::SetWindowText($hwndTopMostFileExplorer, $ThisGitStatus)
-
-}
+[Win32]::SetWindowText($hwndTopMostFileExplorer, $ThisGitStatus)

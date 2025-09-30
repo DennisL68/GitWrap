@@ -1,7 +1,26 @@
 ﻿begin {
-    #check module Microsoft.PowerShell.ThreadJob
+    ### Check requirements
+    try {#for Git
+        git.exe | Out-Null
+    } catch {
+        throw 'Git for Windows is missing.'
+        return
+    }
 
-    ###
+    if (-not (Get-Module Posh-Git -ListAvailable)) {
+        throw 'Module Posh-Git is missing.'
+        return
+    }
+
+    if (
+        $PSVersionTable.PSVersion.Major -eq '5' -and
+        -not (Get-Module Microsoft.PowerShell.ThreadJob -ListAvailable)
+    ) {
+        throw 'Module Microsoft.PowerShell.ThreadJob is missing.'
+        return
+    }
+
+    ### Load Scripts
     $InitGitRepo = [scriptblock]::Create(
         (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw -ErrorAction Stop)
     )
@@ -74,7 +93,8 @@ process {#this is actually also "begin"
 
     $fileMenu = New-Object System.Windows.Forms.ToolStripMenuItem "File"
         $initRepo = New-Object System.Windows.Forms.ToolStripMenuItem "Initialize File Collection"
-        $initRepo.Add_Click({ Start-ThreadJob {'Initialize-GitClone'} -InitializationScript $InitGitRepo })
+        #$initRepo.Add_Click({ Start-ThreadJob {'Initialize-GitClone'} -InitializationScript $InitGitRepo })
+        $initRepo.Add_Click({ & $InitGitRepo })
         $fileMenu.DropDownItems.Add($initRepo)
 
         $cloneRemote = New-Object System.Windows.Forms.ToolStripMenuItem "Clone File Collection"
@@ -251,22 +271,22 @@ process {#this is actually also "begin"
     $rightPanel.Controls.Add($toolbar)
 
     # Add 3 buttons to toolbar
-    $btn1 = New-Object System.Windows.Forms.Button
-    $btn1.Text = "Back"
-    $btn1.Width = 60
-    $btn1.Location = New-Object System.Drawing.Point(5,5)
-    $toolbar.Controls.Add($btn1)
+    $btnBack = New-Object System.Windows.Forms.Button
+    $btnBack.Text = "←"
+    $btnBack.Width = 40
+    $btnBack.Location = New-Object System.Drawing.Point(5,5)
+    $toolbar.Controls.Add($btnBack)
 
-    $btn2 = New-Object System.Windows.Forms.Button
-    $btn2.Text = "Forward"
-    $btn2.Width = 60
-    $btn2.Location = New-Object System.Drawing.Point(70,5)
-    $toolbar.Controls.Add($btn2)
+    $btnUp = New-Object System.Windows.Forms.Button
+    $btnUp.Text = "↑"
+    $btnUp.Width = 40
+    $btnUp.Location = New-Object System.Drawing.Point(50,5)
+    $toolbar.Controls.Add($btnUp)
 
     $btn3 = New-Object System.Windows.Forms.Button
-    $btn3.Text = "Refresh"
-    $btn3.Width = 60
-    $btn3.Location = New-Object System.Drawing.Point(135,5)
+    $btn3.Text = "Refr"
+    $btn3.Width = 40
+    $btn3.Location = New-Object System.Drawing.Point(100,5)
     $toolbar.Controls.Add($btn3)
 
     # WebBrowser
@@ -277,16 +297,30 @@ process {#this is actually also "begin"
     $webBrowser.Navigate("file:///$($PWD.path)")
 
     # Button functionality
-    $btn1.Add_Click({ if ($webBrowser.CanGoBack) { $webBrowser.GoBack() } })
-    $btn2.Add_Click({ if ($webBrowser.CanGoForward) { $webBrowser.GoForward() } })
+    $btnBack.Add_Click({
+        if ($webBrowser.CanGoBack) { $webBrowser.GoBack() }
+    })
+    
+    $btnUp.Add_Click({
+        $Parent = [System.IO.Directory]::GetParent($webBrowser.Url.LocalPath)
+        if ($Parent) {
+            $webBrowser.Url = New-Object System.Uri("file:///$($Parent.FullName -replace '\\','/')")
+        }
+    })
+
     $btn3.Add_Click({ $webBrowser.Refresh() })
+
+    $webBrowser.Add_Navigated({
+        param($ThisObject, $EventArgumentObject)
+        Set-Location $EventArgumentObject.Url.LocalPath
+    })
 
     # Navigate when TreeView node selected
     $treeView.Add_AfterSelect({
         param($ThisObject, $EventArgumentObject)
-        $path = $EventArgumentObject.Node.Tag
-        if (Test-Path $path) {
-            $webBrowser.Navigate("file:///$path")
+        $Path = $EventArgumentObject.Node.Tag
+        if (Test-Path $Path) {
+            $webBrowser.Navigate("file:///$Path")
         }
     })
 
