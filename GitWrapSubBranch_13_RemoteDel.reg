@@ -1,5 +1,0 @@
-﻿Windows Registry Editor Version 5.00
-
-; [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\ContextMenus\GitWrap\GitWrapSub_Branch\shell\13_RemoteDel\command]
-; ;
-; @="pwsh.exe -WindowStyle hidden -EncodedCommand"
