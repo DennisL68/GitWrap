@@ -1,4 +1,25 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+﻿### Check requirements
+try {#for Git
+    git.exe | Out-Null
+} catch {
+    throw 'Git for Windows is missing.'
+    return
+}
+
+if (-not (Get-Module Posh-Git -ListAvailable)) {
+    throw 'Module Posh-Git is missing.'
+    return
+}
+
+if (
+    $PSVersionTable.PSVersion.Major -eq '5' -and
+    -not (Get-Module Microsoft.PowerShell.ThreadJob -ListAvailable)
+) {
+    throw 'Module Microsoft.PowerShell.ThreadJob is missing.'
+    return
+}
+
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $Global:SharedStructure = [hashtable]::Synchronized(@{})
@@ -29,7 +50,58 @@ Start-ThreadJob {
         $LocalStructure
     )
 
-    $pipeServer = New-Object System.IO.Pipes.NamedPipeServerStream("GitWrap", [System.IO.Pipes.PipeDirection]::In)
+    ### Load Scripts
+    $InitGitRepo = [scriptblock]::Create(
+        (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $CloneGitRemote = [scriptblock]::Create(
+        (Get-Content .\Scripts\Clone_GitRemote.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $CommitBranch = [scriptblock]::Create(
+        (Get-Content .\Scripts\Commit-Branch.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $NewBranch = [scriptblock]::Create(
+        (Get-Content .\Scripts\New_Branch.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $SwitchBranch = [scriptblock]::Create(
+        (Get-Content .\Scripts\Switch_Branch.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $DeleteBranch = [scriptblock]::Create(
+        (Get-Content .\Scripts\Delete-Branch.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $PruneRemote = [scriptblock]::Create(
+        (Get-Content .\Scripts\Prune_Remote.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $PullPush = [scriptblock]::Create(
+        (Get-Content .\Scripts\PullPush_Branch.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $RefreshBranchStatus = [scriptblock]::Create(
+        (Get-Content .\Scripts\Refresh_Status.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $GetBranchHistory = [scriptblock]::Create(
+        (Get-Content .\Scripts\Get_BranchLog.ps1 -Raw -ErrorAction Stop)
+    )
+
+    $GetRepoHistory = [scriptblock]::Create(
+        (Get-Content .\Scripts\Get_RepoLog.ps1 -Raw -ErrorAction Stop)
+    )
+
+    #Create pipeServer
+    $pipeServer = New-Object System.IO.Pipes.NamedPipeServerStream(
+        "GitWrap",
+        [System.IO.Pipes.PipeDirection]::In
+    )
+
+
     while ($true) {
         $trayIcon = $LocalStructure["trayIcon"]
         $pipeServer.WaitForConnection()
@@ -41,10 +113,13 @@ Start-ThreadJob {
                 $trayIcon.ShowBalloonTip(2000, "GitWrap", "Pipe message received!", [System.Windows.Forms.ToolTipIcon]::Info)
             }
             "exit" {
+                $pipeServer.Disconnect()
+                $pipeServer.Dispose()
                 $trayIcon.Visible = $false; [System.Windows.Forms.Application]::Exit()
                 exit
             }
         }
+        
         $pipeServer.Disconnect()
     }
 } -ArgumentList $SharedStructure
@@ -52,5 +127,14 @@ Start-ThreadJob {
 
 # Keep the app running until Exit is clicked
 [System.Windows.Forms.Application]::Run()
+
+#Signal the ThreadJob to Exit
+    $pipe = [System.IO.Pipes.NamedPipeClientStream]::new(".", "GitWrap", [System.IO.Pipes.PipeDirection]::Out)
+    $pipe.Connect()
+    $writer = [System.IO.StreamWriter]::new($pipe)
+    $writer.AutoFlush = $true
+    $writer.WriteLine("exit")
+    $writer.Dispose()
+    $pipe.Dispose()
 
 Get-Job | Remove-Job -Force
