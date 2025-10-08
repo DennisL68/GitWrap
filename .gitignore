@@ -18,6 +18,13 @@
 !*.psxml
 !*.cdxml
 
+# Allow JScript
+!*.js
+!*.jse
+!*.wsf
+!*.wsc
+#!*.hta
+
 # Allow generic plain text data formats
 !*.xml
 !*.json
