@@ -15,7 +15,7 @@ var shell = new ActiveXObject("WScript.Shell");
 // Build the cmd.exe command
 // /c = execute and exit
 // > \\.\pipe\GitWrap sends text to the pipe
-var cmdCommand = 'cmd.exe /c echo ' + command + ' > \\\\.\\pipe\\GitWrap';
+var cmdCommand = 'cmd.exe /c echo %cd%' + command + ' > \\\\.\\pipe\\GitWrap';
 
 // Run hidden (0) and wait until finished (true)
 shell.Run(cmdCommand, 0, true);

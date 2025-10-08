@@ -50,7 +50,7 @@ Start-ThreadJob {
         $LocalStructure
     )
 
-    ### Load Scripts
+    ### Load Scriptblocks
     $InitGitRepo = [scriptblock]::Create(
         (Get-Content .\Scripts\Init_GitRepo.ps1 -Raw -ErrorAction Stop)
     )
@@ -106,24 +106,32 @@ Start-ThreadJob {
         $trayIcon = $LocalStructure["trayIcon"]
         $pipeServer.WaitForConnection()
         $reader = New-Object System.IO.StreamReader($pipeServer)
-        $command = ($reader.ReadLine()).Trim()
+
+        $commandLine = $reader.ReadLine() #Should recieve a JSON-array with two values
+        $CommandJson = $commandLine.Replace('\','\\') | ConvertFrom-Json
+
+        $Path   = $CommandJson[0]
+        $Command = $CommandJson[1]
         
-        switch ($command) {
+        switch ($Command) {
             "show" {
                 $trayIcon.ShowBalloonTip(2000, "GitWrap", "Pipe message received!", [System.Windows.Forms.ToolTipIcon]::Info)
             }
             "exit" {
                 $pipeServer.Disconnect()
                 $pipeServer.Dispose()
-                $trayIcon.Visible = $false; [System.Windows.Forms.Application]::Exit()
+                $trayIcon.Visible = $false
+                [System.Windows.Forms.Application]::Exit()
                 exit
             }
         }
-        
+
         $pipeServer.Disconnect()
     }
 } -ArgumentList $SharedStructure
 
+#* Needed to be able to run runspace debugger. Remember to terminate the TrayIcon manually.
+# return 
 
 # Keep the app running until Exit is clicked
 [System.Windows.Forms.Application]::Run()
